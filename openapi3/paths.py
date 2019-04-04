@@ -116,7 +116,7 @@ class Operation(ObjectBase):
         if self.parameters is None:
             self.parameters = []
 
-    def request(self, base_url, security={}, data=None, parameters={}):
+    def request(self, base_url, security={}, data=None, parameters={}, verify=True):
         """
         Sends an HTTP request as described by this Path
 
@@ -125,9 +125,14 @@ class Operation(ObjectBase):
         :type base_url: str
         :param security: The security scheme to use, and the values it needs to
                          process successfully.
-        :type secuirity: dict{str: str}
+        :type security: dict{str: str}
         :param data: The request body to send.
         :type data: any, should match content/type
+        :param parameters: The parameters used to create the path
+        :type parameters: dict{str: str}
+        :param verify: Should we do an ssl verification on the request or not,
+                       In case str was provided, will use that as the CA.
+        :type verify: bool/str
         """
         request_method = self.path[-1] # get the request method
 
@@ -220,7 +225,7 @@ class Operation(ObjectBase):
 
         final_url = base_url + path + "?" +  urlencode(query_params)
 
-        result =  method(final_url, headers=headers, data=body)
+        result =  method(final_url, headers=headers, data=body, verify=verify)
 
         # examine result to see how we should handle it
         # TODO - this should all be refactored into more functions, this is
