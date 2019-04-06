@@ -203,6 +203,8 @@ class Operation(ObjectBase):
         accepted_parameters.update({p.name: p for p in self._root.paths[self.path[-2]].parameters})
 
         # TODO - this should error if it got a bad parameter
+
+        in_path_parameters = {}
         for name, spec in accepted_parameters.items():
             if spec.required and not name in parameters:
                 raise ValueError('Required parameter {} not provided'.format(
@@ -212,9 +214,8 @@ class Operation(ObjectBase):
                 value = parameters[name]
 
                 if spec.in_ == 'path':
-                    # the path's name should match the parameter name, so this
-                    # should work in all cases
-                    path = path.format(**{name: value})
+                    # We keep all the parameters to have only one format
+                    in_path_parameters[name] = value
                 elif spec.in_ == 'query':
                     query_params[name] = value
                     # TODO - make sure this is good enough
@@ -222,6 +223,11 @@ class Operation(ObjectBase):
                     raise NotImplementedError()
                 elif spec.in_ == 'cookie':
                     raise NotImplementedError()
+
+        if in_path_parameters:
+            # the path's name should match the parameter name, so this
+            # should work in all cases
+            path = path.format(**in_path_parameters)
 
         final_url = base_url + path + "?" +  urlencode(query_params)
 
