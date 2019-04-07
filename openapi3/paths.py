@@ -233,6 +233,9 @@ class Operation(ObjectBase):
 
         result =  method(final_url, headers=headers, data=body, verify=verify)
 
+        if not result.ok:
+            result.raise_for_status()
+
         # examine result to see how we should handle it
         # TODO - this should all be refactored into more functions, this is
         # getting too long
