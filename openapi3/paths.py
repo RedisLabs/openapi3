@@ -142,6 +142,7 @@ class Operation(ObjectBase):
         body = None
         path = self.path[-2] # TODO - this won't work for $refs
         query_params = {}
+        cookies = {}
 
         if security and self.security:
             # find a security requirement - according to `the spec`_, only one
@@ -177,7 +178,10 @@ class Operation(ObjectBase):
                     # defines many more authentication schemes that OpenAPI says it supports
                     raise NotImplementedError()
             elif security_scheme.type == 'apiKey':
-                raise NotImplementedError()
+                if security_scheme.in_ == 'cookie':
+                    cookies[security_scheme.name] = value
+                else:
+                    raise NotImplementedError()
             elif security_scheme.type == 'oauth2':
                 raise NotImplementedError()
             elif security_scheme.type == 'openIdConnect':
@@ -231,7 +235,7 @@ class Operation(ObjectBase):
 
         final_url = base_url + path + "?" +  urlencode(query_params)
 
-        result =  method(final_url, headers=headers, data=body, verify=verify)
+        result =  method(final_url, headers=headers, cookies=cookies, data=body, verify=verify)
 
         if not result.ok:
             result.raise_for_status()
